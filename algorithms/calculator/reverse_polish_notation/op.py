@@ -1,84 +1,38 @@
 """
 Programming for linguists
-Interfaces and classes for Operators
+Class for Reverse Polish Notation
 """
 
-from typing import Type
-from algorithms.calculator.reverse_polish_notation.digit import Digit
 from algorithms.calculator.reverse_polish_notation.element import Element
+from data_structures.queue_.queue_ import Queue_
 
 
-class OpFactory:
+class ReversePolishNotation:
     """
-    Class to provide functionality for creating concrete instance of Op
+    Reverse Polish Notation class
+    It just a wrapper for Queue_.
+    To add some interests for this class we add iterations using magic methods
     """
-    
-    _registry = {}
-    @staticmethod
-    def add_op_class(op_class: Type['Op']):
-        """
-        Function to add a new Operator class to registry
-        :param op_class: class of Operator
-        """
-        if not op_class.symbol:
-            return
-        OpFactory._registry[op_class.symbol] = op_class
-        
-    @staticmethod
-    def get_op_by_symbol(op_symbol: str) -> 'Op':
-        """
-        Function to get Operator class by symbol
-        :param op_symbol: symbol of the operator to return
-        :return: class of Operator
-        """
-        try:
-            return OpFactory._registry[op_symbol]()
-        except KeyError as error:
-            raise AssertionError from error
-           
-class OpMeta(type):
-    """
-    Metaclass for all Operators
-    """
-    def __new__(cls, *args, **kwargs):
-        """
-        Method to create a Operator class
-        :param args:
-        :param kwargs:
-        """
-        
-        op_class: Type[Op] = super().__new__(cls, *args, **kwargs)
-        OpFactory.add_op_class(op_class)
-        return op_class
-    
-class Op(Element, metaclass=OpMeta):
-    """
-    Base class for Operators
-    """
-    
-    priority = None
-    symbol = None
-    
-    @staticmethod
-    def _function(*args, **kwargs) -> float:
-        """
-        Functions to calculate the operation.
-        Arguments depends on the specific operator.
-        """
-        raise NotImplementedError
-        
-    def __call__(self, *args, **kwargs) -> Digit:
-        """
-        Public method to call operator.
-        Makes instances of the Op class callable:
-        op = Op();
-        result = op(Digit1, Digit2)
-        """
-        res = self._function(*args, **kwargs)
-        return Digit(res)
 
-    def __gt__(self, other: 'Op') -> bool:
-        return self.priority > other.priority
+    def __init__(self):
+        self._expression_queue = None
+        self._expression_queue = Queue_()
 
-    def __eq__(self, other: 'Op') -> bool:
-        return self.symbol == other.symbol
+    def put(self, element: Element):
+        """
+        Put the element to the RPN
+        :param element: element to put
+        """
+        self._expression_queue.put(element)
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self) -> Element:
+        """
+        Get next element in Reverse Polish Notation
+        :return: next element from rpn if exists. Raise StopIteration Error if does not exist
+        """
+        if self._expression_queue.empty():
+            raise StopIteration
+        return self._expression_queue.get()
